@@ -186,7 +186,7 @@ export default function CommandCenter() {
           </div>
 
           {/* Center Column (col-span-12 lg:col-span-6): Map, Topology, Replay, Active Plan & Diff */}
-          <div className="col-span-12 lg:col-span-6 flex flex-col gap-2.5 animate-fade-in-up animate-delay-3">
+          <div className="col-span-12 lg:col-span-6 flex flex-col gap-2.5">
             {/* Center Tab Selector */}
             <div className="flex flex-wrap items-center gap-1 bg-slate-900/90 border border-slate-800 rounded-xl p-1 text-xs self-start">
               <button

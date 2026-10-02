@@ -61,16 +61,18 @@ function MapResizer({ isFullscreen }) {
         };
 
         // Immediate and staged invalidations ensure tiles render without gray blanks
-        invalidate();
+        requestAnimationFrame(invalidate);
         const t1 = setTimeout(invalidate, 50);
         const t2 = setTimeout(invalidate, 150);
         const t3 = setTimeout(invalidate, 300);
+        const t4 = setTimeout(invalidate, 500);
 
         window.addEventListener('resize', invalidate);
         return () => {
             clearTimeout(t1);
             clearTimeout(t2);
             clearTimeout(t3);
+            clearTimeout(t4);
             window.removeEventListener('resize', invalidate);
         };
     }, [isFullscreen, map]);
@@ -117,7 +119,7 @@ export default function MapView({ state }) {
         <div
             className={`transition-all duration-200 flex flex-col ${
                 isFullscreen
-                    ? 'fixed inset-0 z-[9999] bg-slate-950 p-4 h-screen w-screen overflow-hidden shadow-2xl'
+                    ? 'fixed inset-0 z-[9999] bg-slate-950 p-3 sm:p-4 w-full h-full overflow-hidden shadow-2xl'
                     : 'bg-slate-900 p-3 shadow-xl rounded-xl border border-slate-800 text-slate-100 h-[400px] relative'
             }`}
         >

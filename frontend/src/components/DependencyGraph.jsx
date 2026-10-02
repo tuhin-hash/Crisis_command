@@ -30,9 +30,10 @@ export default function DependencyGraph({ state }) {
         height: window.innerHeight,
       });
     };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isFullscreen]);
 
   // Lock body scrolling when fullscreen overlay is active
   useEffect(() => {
@@ -51,28 +52,28 @@ export default function DependencyGraph({ state }) {
   const assignments = state?.current_plan?.assignments || [];
 
   // Dimensions adapt dynamically between compact and fullscreen modes
-  const width = isFullscreen ? Math.max(900, dimensions.width - 48) : 640;
-  const height = isFullscreen ? Math.max(540, dimensions.height - 150) : 320;
-  const leftX = isFullscreen ? Math.round(width * 0.16) : 80;
-  const rightX = isFullscreen ? Math.round(width * 0.84) : 560;
+  const width = isFullscreen ? Math.max(360, dimensions.width - 32) : 640;
+  const height = isFullscreen ? Math.max(360, dimensions.height - 130) : 320;
+  const leftX = isFullscreen ? Math.round(Math.max(65, width * 0.16)) : 80;
+  const rightX = isFullscreen ? Math.round(Math.min(width - 65, width * 0.84)) : 560;
 
   // Node layout
-  const resSpacing = Math.max(isFullscreen ? 75 : 35, (height - (isFullscreen ? 120 : 60)) / Math.max(1, resources.length));
+  const resSpacing = Math.max(isFullscreen ? 65 : 35, (height - (isFullscreen ? 110 : 60)) / Math.max(1, resources.length));
   const resNodes = resources.map((r, i) => ({
     id: r.id,
     type: 'resource',
     data: r,
     x: leftX,
-    y: (isFullscreen ? 70 : 35) + i * resSpacing,
+    y: (isFullscreen ? 65 : 35) + i * resSpacing,
   }));
 
-  const incSpacing = Math.max(isFullscreen ? 95 : 45, (height - (isFullscreen ? 120 : 60)) / Math.max(1, incidents.length));
+  const incSpacing = Math.max(isFullscreen ? 80 : 45, (height - (isFullscreen ? 110 : 60)) / Math.max(1, incidents.length));
   const incNodes = incidents.map((inc, i) => ({
     id: inc.id,
     type: 'incident',
     data: inc,
     x: rightX,
-    y: (isFullscreen ? 80 : 40) + i * incSpacing,
+    y: (isFullscreen ? 75 : 40) + i * incSpacing,
   }));
 
   // Build links
@@ -90,7 +91,7 @@ export default function DependencyGraph({ state }) {
     <div
       className={`transition-all duration-200 flex flex-col ${
         isFullscreen
-          ? 'fixed inset-0 z-[9999] bg-slate-950 p-4 h-screen w-screen overflow-hidden shadow-2xl'
+          ? 'fixed inset-0 z-[9999] bg-slate-950 p-3 sm:p-4 w-full h-full overflow-hidden shadow-2xl'
           : 'bg-slate-900 border border-slate-800 rounded-xl shadow-xl overflow-hidden text-slate-100'
       }`}
     >
@@ -142,10 +143,11 @@ export default function DependencyGraph({ state }) {
       </div>
 
       {/* SVG Canvas */}
-      <div className={`relative p-2 bg-slate-950/80 flex items-center justify-center overflow-hidden ${isFullscreen ? 'flex-1' : ''}`}>
+      <div className={`relative p-2 bg-slate-950/80 flex items-center justify-center overflow-hidden ${isFullscreen ? 'flex-1 min-h-0' : ''}`}>
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className={`select-none ${isFullscreen ? 'w-full h-full max-h-[calc(100vh-140px)]' : 'max-w-[640px] h-[260px] w-full'}`}
+          className={`select-none ${isFullscreen ? 'w-full h-full' : 'max-w-[640px] h-[260px] w-full'}`}
+          preserveAspectRatio="xMidYMid meet"
         >
           <defs>
             <linearGradient id="linkGradEnRoute" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -169,7 +171,7 @@ export default function DependencyGraph({ state }) {
               selectedEntity?.id === link.asg.resource_id ||
               selectedEntity?.id === link.asg.incident_id;
 
-            const curveOffset = isFullscreen ? 260 : 150;
+            const curveOffset = isFullscreen ? Math.min(260, Math.max(60, (rightX - leftX) * 0.35)) : 150;
             const path = `M ${sx} ${sy} C ${sx + curveOffset} ${sy}, ${tx - curveOffset} ${ty}, ${tx} ${ty}`;
 
             return (
